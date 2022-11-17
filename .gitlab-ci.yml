@@ -1,0 +1,30 @@
+build:
+  image: node:12.17.0
+  cache:
+    paths:
+    - node_modules/
+  stage: build
+  script:
+  - yarn # npm install
+  - yarn build # npm run build
+  artifacts:
+    expire_in: 1 week
+    paths:
+    - build
+  only:
+  - master
+ 
+deploy:
+  image: alpine
+  stage: deploy
+  before_script:
+  - 'which ssh-agent || ( apk add --no-cache openssh )'
+  - eval $(ssh-agent -s)
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+  - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\nHost *\n\tPort $port\n\n" > ~/.ssh/config'
+  script:
+    - echo trigger deploy
+    - apk add --no-cache rsync
+    - rsync -rav --delete build/ gitlab@"$server":/www/notes/
