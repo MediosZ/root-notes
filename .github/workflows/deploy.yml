@@ -33,6 +33,13 @@ jobs:
       - name: Build
         run: yarn install && yarn build
 
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          name: my-artifact
+          # Upload entire repository
+          path: "build/"
+
       - name: Debug over SSH (tmate)
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3.1
@@ -47,12 +54,6 @@ jobs:
     steps:
       - name: Setup Pages
         uses: actions/configure-pages@v2
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
-        with:
-          # Upload entire repository
-          path: "build/"
 
       - name: Deploy to GitHub Pages
         id: deployment
